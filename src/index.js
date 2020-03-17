@@ -37,6 +37,9 @@ let platforms;
 let player;
 
 function create() {
+  /* ========================== */
+  /* == BACKGROUND & GROUND == */
+  /* ========================== */
   this.add.image(400, 300, 'bg');
   platforms = this.physics.add.staticGroup();
   platforms
@@ -47,14 +50,16 @@ function create() {
   platforms.create(50, 250, 'ground');
   platforms.create(750, 220, 'ground');
 
-  // Player
+  /* ========================== */
+  /* ========= PLAYER ========= */
+  /* ========================== */
   player = this.physics.add.sprite(100, 450, 'player');
 
   // Add Collider
   this.physics.add.collider(player, platforms);
 
   player.setBounce(0.2);
-  player.body.setGravityY(300);
+  player.body.setGravityY(330);
   player.setCollideWorldBounds(true);
 
   this.anims.create({
@@ -78,4 +83,23 @@ function create() {
   });
 }
 
-function update() {}
+// Keyboard control
+let cursors;
+function update() {
+  cursors = this.input.keyboard.createCursorKeys();
+
+  if (cursors.left.isDown) {
+    player.setVelocityX(-160);
+    player.anims.play('left', true);
+  } else if (cursors.right.isDown) {
+    player.setVelocityX(160);
+    player.anims.play('right', true);
+  } else {
+    player.setVelocityX(0);
+    player.anims.play('turn');
+  }
+
+  if (cursors.up.isDown && player.body.touching.down) {
+    player.setVelocityY(-330);
+  }
+}
