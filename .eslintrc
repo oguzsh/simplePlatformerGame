@@ -10,6 +10,6 @@
     "comma-dangle": ["warn", "never"],
     "object-shorthand": "off",
     "no-use-before-define": "off",
-    "linebreak-style": 0,
+    "linebreak-style": 0
   }
 }
