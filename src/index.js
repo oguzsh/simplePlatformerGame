@@ -4,7 +4,7 @@ import Game from './scenes/Game';
 
 // Phaser config
 const config = {
-  type: Phaser.CANVAS,
+  type: Phaser.AUTO,
   width: 800,
   height: 600,
   physics: {
