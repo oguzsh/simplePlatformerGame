@@ -1,4 +1,4 @@
-export default function playerManager(cursors, player) {
+export default function keyboardManager(cursors, player) {
   if (cursors.left.isDown) {
     player.setVelocityX(-160);
     player.anims.play('left', true);

@@ -4,11 +4,18 @@ import Phaser from 'phaser';
 import bg from '../assets/bg.png';
 import playerSprite from '../assets/player.png';
 import ground from '../assets/platform.png';
-import playerManager from '../helpers/playerManager';
+import tomato from '../assets/tomato.png';
 
+// Helpers
+import keyboardManager from '../helpers/keyboardManager';
+
+// Variables
 let platforms;
 let player;
 let cursors;
+let tomatoes;
+let score = 0;
+let scoreText;
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -18,6 +25,7 @@ export default class Game extends Phaser.Scene {
   preload() {
     this.load.image('bg', bg);
     this.load.image('ground', ground);
+    this.load.image('tomato', tomato);
     this.load.spritesheet('player', playerSprite, {
       frameWidth: 32,
       frameHeight: 48
@@ -34,7 +42,7 @@ export default class Game extends Phaser.Scene {
       .create(400, 568, 'ground')
       .setScale(2)
       .refreshBody();
-    platforms.create(600, 400, 'ground');
+    platforms.create(600, 455, 'ground');
     platforms.create(50, 250, 'ground');
     platforms.create(750, 220, 'ground');
 
@@ -50,6 +58,7 @@ export default class Game extends Phaser.Scene {
     player.body.setGravityY(330);
     player.setCollideWorldBounds(true);
 
+    // Animations
     this.anims.create({
       key: 'left',
       frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
@@ -69,10 +78,36 @@ export default class Game extends Phaser.Scene {
       frameRate: 10,
       repeat: -1
     });
+
+    tomatoes = this.physics.add.group({
+      key: 'tomato',
+      repeat: 11,
+      setXY: { x: 12, y: 0, stepX: 70 }
+    });
+
+    tomatoes.children.iterate((child) => {
+      child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    });
+
+    this.physics.add.collider(tomatoes, platforms);
+    this.physics.add.overlap(player, tomatoes, collectTomatoes, null, this);
+
+    // eslint-disable-next-line no-shadow
+    function collectTomatoes(player, tomato) {
+      tomato.disableBody(true, true);
+      score += 10;
+      scoreText.setText(`Score: ${score}`);
+    }
+
+    // Score
+    scoreText = this.add.text(16, 16, 'Score: 0', {
+      fontSize: '32px',
+      fill: '#000'
+    });
   }
 
   update() {
     cursors = this.input.keyboard.createCursorKeys();
-    playerManager(cursors, player);
+    keyboardManager(cursors, player);
   }
 }
