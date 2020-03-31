@@ -4,7 +4,9 @@ import Phaser from 'phaser';
 import bg from '../assets/bg.png';
 import playerSprite from '../assets/player.png';
 import ground from '../assets/platform.png';
-import tomato from '../assets/tomato.png';
+import block from '../assets/block.png';
+import smallPlatform from '../assets/smallPlatform.png';
+import coin from '../assets/coin.png';
 
 // Helpers
 import keyboardManager from '../helpers/keyboardManager';
@@ -13,9 +15,8 @@ import keyboardManager from '../helpers/keyboardManager';
 let platforms;
 let player;
 let cursors;
-let tomatoes;
+let coins;
 let score = 0;
-let scoreText;
 
 export default class Game extends Phaser.Scene {
   constructor() {
@@ -24,8 +25,10 @@ export default class Game extends Phaser.Scene {
 
   preload() {
     this.load.image('bg', bg);
+    this.load.image('coin', coin);
     this.load.image('ground', ground);
-    this.load.image('tomato', tomato);
+    this.load.image('smallPlatform', smallPlatform);
+    this.load.image('block', block);
     this.load.spritesheet('player', playerSprite, {
       frameWidth: 32,
       frameHeight: 48
@@ -39,12 +42,14 @@ export default class Game extends Phaser.Scene {
     this.add.image(400, 300, 'bg');
     platforms = this.physics.add.staticGroup();
     platforms
-      .create(400, 568, 'ground')
-      .setScale(2)
-      .refreshBody();
-    platforms.create(600, 455, 'ground');
-    platforms.create(50, 250, 'ground');
-    platforms.create(750, 220, 'ground');
+      .create(400, 560, 'ground')
+      .setScale(0.8).refreshBody();
+    platforms.create(550, 450, 'smallPlatform');
+    platforms.create(120, 300, 'smallPlatform');
+    platforms.create(320, 380, 'smallPlatform');
+    platforms.create(720, 220, 'smallPlatform');
+    platforms.create(280, 220, 'block');
+    platforms.create(450, 200, 'block');
 
     /* ========================== */
     /* ========= PLAYER ========= */
@@ -61,8 +66,8 @@ export default class Game extends Phaser.Scene {
     // Animations
     this.anims.create({
       key: 'left',
-      frames: this.anims.generateFrameNumbers('player', { start: 0, end: 3 }),
-      frameRate: 10,
+      frames: this.anims.generateFrameNumbers('player', { start: 0, end: 1 }),
+      frameRate: 5,
       repeat: -1
     });
 
@@ -79,31 +84,38 @@ export default class Game extends Phaser.Scene {
       repeat: -1
     });
 
-    tomatoes = this.physics.add.group({
-      key: 'tomato',
+
+    // Coins
+    coins = this.physics.add.group({
+      key: 'coin',
       repeat: 11,
-      setXY: { x: 12, y: 0, stepX: 70 }
+      setXY: { x: 20, y: 0, stepX: 68 }
     });
 
-    tomatoes.children.iterate((child) => {
-      child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    coins.children.iterate((child) => {
+      child.setBounceY(0.2);
     });
 
-    this.physics.add.collider(tomatoes, platforms);
-    this.physics.add.overlap(player, tomatoes, collectTomatoes, null, this);
-
-    // eslint-disable-next-line no-shadow
-    function collectTomatoes(player, tomato) {
-      tomato.disableBody(true, true);
-      score += 10;
-      scoreText.setText(`Score: ${score}`);
-    }
+    this.physics.add.collider(coins, platforms);
+    this.physics.add.overlap(player, coins, collectCoins, null, this);
 
     // Score
-    scoreText = this.add.text(16, 16, 'Score: 0', {
+    const scoreText = this.add.text(16, 16, 'Score: 0', {
       fontSize: '32px',
       fill: '#000'
     });
+
+
+    // eslint-disable-next-line no-shadow
+    function collectCoins(player, coin) {
+      coin.disableBody(true, true);
+      score += 10;
+      scoreText.setText(`Score: ${score}`);
+      if (coins.countActive(true) === 0) {
+        const gameOverText = this.add.text(300, 300, 'GAME OVER', { fontSize: '32px', fill: '#000' });
+        gameOverText.setDepth(1);
+      }
+    }
   }
 
   update() {
